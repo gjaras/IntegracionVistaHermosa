@@ -7,10 +7,13 @@ package dao;
 
 import dto.FuncionarioDto;
 import dto.PermisoDto;
+import dto.UnidadDto;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedList;
 import sql.Conexion;
 
@@ -198,6 +201,98 @@ public class PermisoDaoImp implements PermisoDao{
                     autorizante.setHabilitado(rs.getInt("habilitado_autorizante"));
                     dto.setAutorizante(autorizante);
                     
+                }
+                permisos.add(dto);
+            }
+        }
+        catch(SQLException sqlex)
+        {
+            System.out.println("PermisoDaoImp.BuscarPermisos Error sql: "+sqlex.getMessage());
+        }
+        catch(Exception ex)
+        {
+            System.out.println("PermisoDaoImp.BuscarPermisos Error: "+ex.getMessage());
+        }
+        return permisos;
+    }
+    
+    @Override
+    public LinkedList<PermisoDto> buscarPermisosAnuales() {
+        LinkedList<PermisoDto> permisos = new LinkedList<>();
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sql = "SELECT "
+                    + "p.id_permiso"
+                    + ",p.tipo_permiso"
+                    + ",p.estado"
+                    + ",p.fecha_inicio"
+                    + ",p.fecha_termino"
+                    + ",p.fecha_solicitud"
+                    + ",p.desc_permiso"
+                    + ",p.solicitante_run_sin_dv"
+                    + ",s.run_dv as run_dv_solicitante"
+                    + ",s.nom_funcionario as nom_solicitante"
+                    + ",s.ap_paterno as ap_paterno_solicitante"
+                    + ",s.ap_materno as ap_materno_solicitante"
+                    + ",s.fec_nacimiento as fec_nacimiento_solicitante"
+                    + ",s.correo as correo_solicitante"
+                    + ",s.direc_funcionario as direc_solicitante"
+                    + ",s.cargo as cargo_solicitante"
+                    + ",s.habilitado as habilitado_solicitante"
+                    + ",s.unidad_id_unidad"
+                    + ",u.nombre_unidad"
+                    + ",u.descripcion_unidad"
+                    + ",u.direccion_unidad"
+                    + ",u.habilitado as habilitado_unidad "
+                    + "FROM sol_permiso p "
+                    + "LEFT JOIN FUNCIONARIO s ON s.run_sin_dv = p.solicitante_run_sin_dv "
+                    + "LEFT JOIN UNIDAD u ON s.unidad_id_unidad = u.id_unidad "
+                    + "WHERE p.fecha_termino BETWEEN ? AND ? ";
+            PreparedStatement stmt = con.prepareStatement(sql);
+            Calendar cal = Calendar.getInstance();
+            int anno = cal.get(Calendar.YEAR);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            
+            stmt.setDate(1, new java.sql.Date(sdf.parse((anno-1)+"-09-01").getTime()));
+            stmt.setDate(2, new java.sql.Date(sdf.parse(anno+"-08-31").getTime()));
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next())
+            {
+                PermisoDto dto = new PermisoDto();
+                dto.setId(rs.getInt("id_permiso"));
+                dto.setTipo(rs.getString("tipo_permiso"));
+                dto.setEstado(rs.getInt("estado"));
+                if(rs.wasNull())
+                    dto.setEstado(2);
+                dto.setFechaInicio(rs.getDate("fecha_inicio"));
+                dto.setFechaTermino(rs.getDate("fecha_termino"));
+                dto.setFechaSolicitud(rs.getDate("fecha_solicitud"));
+                dto.setDescripcion(rs.getString("desc_permiso"));
+                if(rs.getInt("solicitante_run_sin_dv") != 0)
+                {
+                    FuncionarioDto solicitante = new FuncionarioDto();
+                    solicitante.setRun(rs.getInt("solicitante_run_sin_dv"));
+                    solicitante.setDv(rs.getInt("run_dv_solicitante"));
+                    solicitante.setNombre(rs.getString("nom_solicitante"));
+                    solicitante.setApellidoPaterno(rs.getString("ap_paterno_solicitante"));
+                    solicitante.setApellidoMaterno(rs.getString("ap_materno_solicitante"));
+                    solicitante.setFechaNacimiento(rs.getDate("fec_nacimiento_solicitante"));
+                    solicitante.setCorreo(rs.getString("correo_solicitante"));
+                    solicitante.setDireccion(rs.getString("direc_solicitante"));
+                    solicitante.setCargo(rs.getString("cargo_solicitante"));
+                    solicitante.setHabilitado(rs.getInt("habilitado_solicitante"));
+                    if(rs.getInt("unidad_id_unidad") != 0)
+                    {
+                        UnidadDto unidad = new UnidadDto();
+                        unidad.setId(rs.getInt("unidad_id_unidad"));
+                        unidad.setNombre(rs.getString("nombre_unidad"));
+                        unidad.setDescripcion(rs.getString("descripcion_unidad"));
+                        unidad.setDireccion(rs.getString("direccion_unidad"));
+                        unidad.setHabilitado(rs.getInt("habilitado_unidad"));
+                        solicitante.setUnidad(unidad);
+                    }
+                    dto.setSolicitante(solicitante);
                 }
                 permisos.add(dto);
             }

@@ -29,7 +29,7 @@ public class UsuarioDaoImp implements UsuarioDao{
             String sqlString;
             sqlString = "{call PR_CREAR_USUARIO(?,?,?,?,?)}";
             CallableStatement proc = con.prepareCall(sqlString);
-            proc.registerOutParameter(1, java.sql.Types.INTEGER+1);
+            proc.registerOutParameter(1, java.sql.Types.INTEGER);
             proc.setString(2, dto.getNombre());
             proc.setString(3,dto.getClave());
             proc.setString(4, dto.getTipoUsuario());

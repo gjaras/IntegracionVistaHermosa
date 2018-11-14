@@ -515,4 +515,46 @@ public class WebServiceAppEscritorio {
         return mensajeRetorno;
     }
     
+    @WebMethod(operationName = "validarResolucion")
+    public String validarResolucion(@WebParam(name = "idResolucion") int idResolucion, @WebParam(name = "runResolvente") int runResolvente){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("Respuesta").Serializar(new ResolucionDaoImp().validarResolucion(idResolucion,runResolvente));
+        }
+        catch(Exception ex)
+        {
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    
+    @WebMethod(operationName = "invalidarResolucion")
+    public String invalidarResolucion(@WebParam(name = "idResolucion") int idResolucion, @WebParam(name = "runResolvente") int runResolvente){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("Respuesta").Serializar(new ResolucionDaoImp().invalidarResolucion(idResolucion,runResolvente));
+        }
+        catch(Exception ex)
+        {
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    
+    @WebMethod(operationName = "buscarPermisosAnuales")
+    public String buscarPermisosAnuales(){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("").generarArchivoXmlAnualPermiso((List)new PermisoDaoImp().buscarPermisosAnuales());
+        }
+        catch(Exception ex)
+        {
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    
 }

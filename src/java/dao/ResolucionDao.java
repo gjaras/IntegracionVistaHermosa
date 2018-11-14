@@ -15,4 +15,6 @@ import java.util.LinkedList;
 public interface ResolucionDao {
     public LinkedList<ResolucionDto> buscarResoluciones( int mes, int anno, int idUnidad);
     public LinkedList<ResolucionDto> buscarResoluciones( int mes, int anno);
+    public int validarResolucion(int idResolucion,int runResolvente);
+    public int invalidarResolucion(int idResolucion,int runResolvente);
 }

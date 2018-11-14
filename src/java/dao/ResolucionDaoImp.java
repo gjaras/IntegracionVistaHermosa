@@ -9,6 +9,7 @@ import dto.FuncionarioDto;
 import dto.PermisoDto;
 import dto.ResolucionDto;
 import dto.UnidadDto;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -357,6 +358,58 @@ public class ResolucionDaoImp implements ResolucionDao{
             System.out.println("ResolucionDaoImp.buscarResolucioness Error: "+ex.getMessage());
         }
         return resoluciones;
+    }
+    
+    @Override
+    public int validarResolucion(int idResolucion,int runResolvente)
+    {
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sqlString;
+            sqlString = "{call PR_VALIDAR_RESOLUCION(?,?,?)}";
+            CallableStatement proc = con.prepareCall(sqlString);
+            proc.registerOutParameter(1, java.sql.Types.INTEGER);
+            proc.setInt(2, idResolucion);
+            proc.setInt(3, runResolvente);
+            proc.executeQuery();
+            return proc.getInt(1);
+        }catch(SQLException sqle)
+        {
+            System.out.println("ResolucionDaoImp.validarResolucion Error SQL con el procedure PR_VALIDAR_RESOLUCION: "+sqle.getMessage());
+            return sqle.getErrorCode();
+        }
+        catch(Exception e)
+        {
+            System.out.println("ResolucionDaoImp.validarResolucion Error: "+e.getMessage());
+            return -1;
+        }
+    }
+    
+    @Override
+    public int invalidarResolucion(int idResolucion,int runResolvente)
+    {
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sqlString;
+            sqlString = "{call PR_INVALIDAR_RESOLUCION(?,?,?)}";
+            CallableStatement proc = con.prepareCall(sqlString);
+            proc.registerOutParameter(1, java.sql.Types.INTEGER);
+            proc.setInt(2, idResolucion);
+            proc.setInt(3, runResolvente);
+            proc.executeQuery();
+            return proc.getInt(1);
+        }catch(SQLException sqle)
+        {
+            System.out.println("ResolucionDaoImp.invalidarResolucion Error SQL con el procedure PR_INVALIDAR_RESOLUCION: "+sqle.getMessage());
+            return sqle.getErrorCode();
+        }
+        catch(Exception e)
+        {
+            System.out.println("ResolucionDaoImp.invalidarResolucion Error: "+e.getMessage());
+            return -1;
+        }
     }
     
 }

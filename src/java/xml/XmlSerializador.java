@@ -18,6 +18,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import dto.PermisoDto;
+import javax.xml.transform.OutputKeys;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.DocumentType;
 
 /**
  *
@@ -71,6 +75,32 @@ public class XmlSerializador {
         raizXML.appendChild(doc.createTextNode(String.valueOf(respuesta)));
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
+        StringWriter writer = new StringWriter();
+        transformer.transform(new DOMSource(doc), new StreamResult(writer));
+        return writer.getBuffer().toString();
+    }
+    
+    public String generarArchivoXmlAnualPermiso(List<PermisoDto> permisos) throws ParserConfigurationException, TransformerException
+    {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        Document doc = docBuilder.newDocument();
+        Element rootXML = doc.createElement("MENSAJE");
+        doc.appendChild(rootXML);
+        for (PermisoDto permiso : permisos) {
+            permiso.empaquetarPermisoParaArchivoXml(rootXML, doc);
+        }
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        DOMImplementation domImpl = doc.getImplementation();
+        DocumentType doctype = domImpl.createDocumentType("doctype",
+            "",
+            "define_permiso.dtd");
+        //transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, doctype.getPublicId());
+        transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.getSystemId());
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         return writer.getBuffer().toString();

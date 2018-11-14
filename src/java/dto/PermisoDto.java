@@ -7,6 +7,7 @@ package dto;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -183,7 +184,44 @@ public class PermisoDto implements Empaquetable{
         return "PermisoDto{" + "id=" + id + ", tipo=" + tipo + ", estado=" + estado + ", fechaInicio=" + fechaInicio + ", fechaTermino=" + fechaTermino + ", fechaSolicitud=" + fechaSolicitud + ", descripcion=" + descripcion + ", \nsolicitante=" + ((solicitante==null)?solicitante:solicitante.toString()) + ", \nautorizante=" + ((autorizante==null)?autorizante:autorizante.toString()) + '}';
     }
     
-    
+    public void empaquetarPermisoParaArchivoXml(Node nodeXML, Document doc)
+    {
+        Element permisoXML = doc.createElement("permiso");
+        nodeXML.appendChild(permisoXML);
+        Element funcionarioXML = doc.createElement("funcionario");
+        permisoXML.appendChild(funcionarioXML);
+        
+        Element nombreXML = doc.createElement("nombre");
+        nombreXML.appendChild(doc.createTextNode(this.getSolicitante().getNombre()+" "+this.getSolicitante().getApellidoPaterno()));
+        funcionarioXML.appendChild(nombreXML);
+        Element runXML = doc.createElement("run");
+        runXML.appendChild(doc.createTextNode(String.valueOf(this.solicitante.getRun())));
+        funcionarioXML.appendChild(runXML);
+        String dv = (this.solicitante.getDv() == 10)?"k":String.valueOf(this.solicitante.getDv());
+        Element dvXML = doc.createElement("dv");
+        dvXML.appendChild(doc.createTextNode(dv));
+        funcionarioXML.appendChild(dvXML);
+        Element unidadXML = doc.createElement("unidad");
+        unidadXML.appendChild(doc.createTextNode(this.solicitante.getUnidad().getNombre()));
+        funcionarioXML.appendChild(unidadXML);
+        Element detalleXML = doc.createElement("detalle");
+        
+        permisoXML.appendChild(detalleXML);
+        Element fechaInicioXML = doc.createElement("fecha_inicio");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        fechaInicioXML.appendChild(doc.createTextNode(sdf.format(fechaInicio)));
+        detalleXML.appendChild(fechaInicioXML);
+        Element fechaTerminoXML = doc.createElement("fecha_termino");
+        fechaTerminoXML.appendChild(doc.createTextNode(sdf.format(fechaTermino)));
+        detalleXML.appendChild(fechaTerminoXML);
+        int dias = (1+(int)TimeUnit.DAYS.convert(this.fechaInicio.getTime()-this.fechaTermino.getTime(),TimeUnit.MILLISECONDS));
+        Element diasXML = doc.createElement("dias");
+        diasXML.appendChild(doc.createTextNode(String.valueOf(dias)));
+        detalleXML.appendChild(diasXML);
+        Element tipoXML = doc.createElement("tipo");
+        tipoXML.appendChild(doc.createTextNode(this.tipo));
+        detalleXML.appendChild(tipoXML);
+    }
     
     
 }
