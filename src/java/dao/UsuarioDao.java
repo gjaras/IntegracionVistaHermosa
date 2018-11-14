@@ -14,6 +14,7 @@ import java.util.LinkedList;
  */
 public interface UsuarioDao extends BaseDao<UsuarioDto>{
     public LinkedList<UsuarioDto> listarUsuarios();
+    public LinkedList<UsuarioDto> listarUsuariosWithParameters(String id, String tipo, String Password);
     public boolean usuarioExiste(String nombre);
     public UsuarioDto autenticarUsuario(String nombre, String clave);
 }

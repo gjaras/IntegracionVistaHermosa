@@ -170,6 +170,7 @@ public class UsuarioDaoImp implements UsuarioDao{
                     + ",u.clave"
                     + ",u.tipo_usuario"
                     + ",u.funcionario_run_sin_dv"
+                    + ",f.run_dv"
                     + ",f.nom_funcionario"
                     + ",f.ap_paterno"
                     + ",f.ap_materno"
@@ -193,6 +194,7 @@ public class UsuarioDaoImp implements UsuarioDao{
                 {
                     FuncionarioDto funcionario = new FuncionarioDto();
                     funcionario.setRun(rs.getInt("funcionario_run_sin_dv"));
+                    funcionario.setDv(rs.getInt("run_dv"));
                     funcionario.setNombre(rs.getString("nom_funcionario"));
                     funcionario.setApellidoPaterno(rs.getString("ap_paterno"));
                     funcionario.setApellidoMaterno(rs.getString("ap_materno"));
@@ -276,4 +278,67 @@ public class UsuarioDaoImp implements UsuarioDao{
         return dto;
     }
 
+    @Override
+    public LinkedList<UsuarioDto> listarUsuariosWithParameters(String id, String tipo, String nombre) {
+        LinkedList<UsuarioDto> usuarios = new LinkedList<>();
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sql = "SELECT "
+                    + "u.id_usuario"
+                    + ",u.nombre_usuario"
+                    + ",u.tipo_usuario"
+                    + ",u.funcionario_run_sin_dv"
+                    + ",f.run_dv "
+                    + "FROM USUARIO u "
+                    + "left join FUNCIONARIO f ON f.run_sin_dv = u.funcionario_run_sin_dv ";
+            
+            if(!id.isEmpty() || !tipo.isEmpty() || !nombre.isEmpty()){
+                sql += "where ";
+                if(!id.isEmpty()){
+                    sql += "u.id_usuario = "+id;
+                }
+                if(!tipo.isEmpty()){
+                    if(!id.isEmpty()){
+                        sql += " and ";
+                    }
+                    sql += "u.tipo_usuario = '"+tipo+"'";
+                }
+                if(!nombre.isEmpty()){
+                    if(!id.isEmpty() || !tipo.isEmpty()){
+                        sql += " and ";
+                    }
+                    sql += "upper(u.nombre_usuario) like upper('%"+nombre+"%')";
+                }    
+            }
+            System.out.println(sql);
+            PreparedStatement stmt = con.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next())
+            {
+                UsuarioDto dto = new UsuarioDto();
+                dto.setId(rs.getInt("id_usuario"));
+                dto.setNombre(rs.getString("nombre_usuario"));
+                dto.setTipoUsuario(rs.getString("tipo_usuario"));
+                if(rs.getInt("funcionario_run_sin_dv") != 0)
+                {
+                    FuncionarioDto funcionario = new FuncionarioDto();
+                    funcionario.setRun(rs.getInt("funcionario_run_sin_dv"));
+                    funcionario.setDv(rs.getInt("run_dv"));
+                    dto.setFuncionario(funcionario);
+                }
+                usuarios.add(dto);
+            }
+        }
+        catch(SQLException sqlex)
+        {
+            System.out.println("UsuarioDaoImp.listarUsuariosWithParameters Error sql: "+sqlex.getMessage());
+        }
+        catch(Exception ex)
+        {
+            System.out.println("UsuarioDaoImp.listarUsuariosWith Parameters Error: ");
+            ex.printStackTrace();
+        }
+        return usuarios;
+    }
 }
