@@ -179,7 +179,7 @@ public class PermisoWs {
     }
 
     @POST
-    @Path("/requestPeticionesList")
+    @Path("/requestList")
     @Consumes("application/json")
     @Produces("application/json")
     public Response requestPeticionesList(@HeaderParam("accessToken") String accessToken, String content) {
