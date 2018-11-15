@@ -11,6 +11,14 @@ import dao.UsuarioDaoImp;
 import dto.FuncionarioDto;
 import dto.PermisoDto;
 import dto.UsuarioDto;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Objects;
 import javax.ws.rs.GET;
@@ -114,6 +122,63 @@ public class PermisoWs {
     }
 
     @POST
+    @Path("/create")
+    @Produces("application/json")
+    public Response createPermiso(@HeaderParam("accessToken") String accessToken, String content) {
+        LOG.info("Request for Create Solicitud initiated");
+        LOG.info(String.format("token: {} content: {}", accessToken, content));
+
+        Gson jsonConstructor = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject response = new JsonObject();
+
+        //if(accessToken.equalsIgnoreCase(Config.get("ACCESS_TOKEN"))){
+        if (accessToken.equalsIgnoreCase("password")) {
+            LOG.info("correct access token");
+
+            JsonObject request = new JsonParser().parse(content).getAsJsonObject();
+            try {
+                PermisoDto pdto = new PermisoDto();
+                pdto.setTipo(request.get("tipo").getAsString());
+                SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+                Date startDate;
+                startDate = df.parse(request.get("fecInit").getAsString());
+                Date endDate;
+                endDate = df.parse(request.get("fecFin").getAsString());
+                pdto.setFechaInicio(startDate);
+                pdto.setFechaTermino(endDate);
+                pdto.setDescripcion(request.get("desc").getAsString());
+                FuncionarioDaoImp fdi = new FuncionarioDaoImp();
+                FuncionarioDto fdto = fdi.buscarFuncionarioParcial(Integer.parseInt(request.get("userRutSinDv").getAsString()));
+                pdto.setSolicitante(fdto);
+                PermisoDaoImp pdi = new PermisoDaoImp();
+                int result = pdi.insertar(pdto);
+                if (result == -1) {
+                    LOG.info("Invalid Parameters");
+                    response.addProperty("response", "failed");
+                    response.addProperty("message", "Invalid Parameters");
+                    return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } else {
+                    LOG.info("Permiso Correctly Inserted");
+                    response.addProperty("response", "success");
+                    response.addProperty("result", "success");
+                    response.addProperty("permisoId", result);
+                    return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                }
+            } catch (Exception ex) {
+                LOG.info("There was an exception: " + ex.toString());
+                response.addProperty("response", "failed");
+                response.addProperty("message", "Internal Server Error: " + ex.getLocalizedMessage());
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        } else {
+            LOG.info("invalid access token");
+            response.addProperty("response", "failed");
+            response.addProperty("message", "Invalid Access Token");
+            return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+    }
+
+    @POST
     @Path("/requestPeticionesList")
     @Consumes("application/json")
     @Produces("application/json")
@@ -134,9 +199,9 @@ public class PermisoWs {
 
                 PermisoDaoImp pdi = new PermisoDaoImp();
                 LinkedList<PermisoDto> list = new LinkedList<PermisoDto>();
-                if(request.get("rut") != null){
+                if (request.get("rut") != null) {
                     list = pdi.buscarPermisos(Integer.parseInt(request.get("rut").getAsString().split("-")[0]));
-                }else{
+                } else {
                     list = pdi.listPermisos();
                 }
                 JsonArray permisoJsonArray = new JsonArray();
@@ -144,13 +209,13 @@ public class PermisoWs {
                     for (PermisoDto pdo : list) {
                         JsonObject permisoJsonO = new JsonObject();
                         permisoJsonO.addProperty("permisoId", pdo.getId());
-                        permisoJsonO.addProperty("permisoFunc", pdo.getSolicitante().getRun()+"-"+pdo.getSolicitante().getDv());
+                        permisoJsonO.addProperty("permisoFunc", pdo.getSolicitante().getRun() + "-" + pdo.getSolicitante().getDv());
                         permisoJsonO.addProperty("permisoType", pdo.getTipo());
                         permisoJsonO.addProperty("permisoFechaSol", pdo.getFechaSolicitud().toString());
                         permisoJsonO.addProperty("permisoFechaIni", pdo.getFechaInicio().toString());
                         permisoJsonO.addProperty("permisoFechaFin", pdo.getFechaTermino().toString());
                         permisoJsonO.addProperty("permisoStatus", pdo.getEstado());
-                        permisoJsonO.addProperty("permisoAut", pdo.getAutorizante() == null ? "N/A" : pdo.getAutorizante().getRun()+"-"+pdo.getAutorizante().getDv());
+                        permisoJsonO.addProperty("permisoAut", pdo.getAutorizante() == null ? "N/A" : pdo.getAutorizante().getRun() + "-" + pdo.getAutorizante().getDv());
                         permisoJsonArray.add(permisoJsonO);
                     }
                     response.add("permisoList", permisoJsonArray);
@@ -171,5 +236,4 @@ public class PermisoWs {
         }
 
     }
- 
 }
