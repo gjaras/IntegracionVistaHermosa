@@ -359,4 +359,54 @@ public class PermisoDaoImp implements PermisoDao {
         }
         return null;
     }
+    
+    public int aceptar(int id, int runSinDv){
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sqlString;
+            sqlString = "{call PR_AUTORIZAR_PERMISO(?,?,?)}";
+            CallableStatement proc = con.prepareCall(sqlString);
+            proc.registerOutParameter(1, java.sql.Types.INTEGER);
+            proc.setInt(2, id);
+            proc.setInt(3, runSinDv);
+            proc.executeQuery();
+            return proc.getInt(1);
+        }catch(SQLException sqle)
+        {
+            System.out.println("UsuarioDaoImp.insertar Error SQL con el procedure PR_CREAR_USUARIO: "+sqle.getMessage());
+            //return sqle.getErrorCode();
+            return -1;
+        }
+        catch(Exception e)
+        {
+            System.out.println("UsuarioDaoImp.insertar Error: "+e.getMessage());
+            return -1;
+        }
+    }
+    
+    public int rechazar(int id, int runSinDv){
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sqlString;
+            sqlString = "{call PR_RECHAZAR_PERMISO(?,?,?)}";
+            CallableStatement proc = con.prepareCall(sqlString);
+            proc.registerOutParameter(1, java.sql.Types.INTEGER);
+            proc.setInt(2, id);
+            proc.setInt(3, runSinDv);
+            proc.executeQuery();
+            return proc.getInt(1);
+        }catch(SQLException sqle)
+        {
+            System.out.println("UsuarioDaoImp.insertar Error SQL con el procedure PR_CREAR_USUARIO: "+sqle.getMessage());
+            //return sqle.getErrorCode();
+            return -1;
+        }
+        catch(Exception e)
+        {
+            System.out.println("UsuarioDaoImp.insertar Error: "+e.getMessage());
+            return -1;
+        }
+    }
 }

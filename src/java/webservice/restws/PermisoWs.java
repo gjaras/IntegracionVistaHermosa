@@ -236,4 +236,50 @@ public class PermisoWs {
         }
 
     }
+    
+    @GET
+    @Path("/changeState")
+    @Produces("application/json")
+    public Response changeSolicitudState(@HeaderParam("accessToken") String accessToken, 
+            @QueryParam("id") String id, @QueryParam("opType") String opType,
+            @QueryParam("runSinDv") String runSinDv) {
+        LOG.info("Request for Change Solicitud State");
+        LOG.info(String.format("token: {}", accessToken));
+
+        Gson jsonConstructor = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject response = new JsonObject();
+
+        //if(accessToken.equalsIgnoreCase(Config.get("ACCESS_TOKEN"))){
+        if (accessToken.equalsIgnoreCase("password")) {
+            LOG.info("correct access token");
+            try {
+                LOG.info("Received parameters: id="+id+" opType="+opType);
+                PermisoDaoImp pdi = new PermisoDaoImp();
+                int result;
+                if(opType.equalsIgnoreCase("accept")){
+                    result = pdi.aceptar(Integer.parseInt(id), Integer.parseInt(runSinDv));
+                }else{
+                    result = pdi.rechazar(Integer.parseInt(id), Integer.parseInt(runSinDv));
+                }
+                LOG.info("result: "+result);
+                if(result == -1){
+                    response.addProperty("result", "success");
+                }else{
+                    response.addProperty("result", "failed");
+                }
+                response.addProperty("response", "success");
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            } catch (Exception ex) {
+                LOG.info("There was an exception: " + ex.toString());
+                response.addProperty("response", "failed");
+                response.addProperty("message", "Internal Server Error: " + ex.getLocalizedMessage());
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        } else {
+            LOG.info("invalid access token");
+            response.addProperty("response", "failed");
+            response.addProperty("message", "Invalid Access Token");
+            return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+    }
 }
