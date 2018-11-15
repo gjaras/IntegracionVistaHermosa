@@ -276,4 +276,44 @@ public class UsuarioWs {
             return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
     }
+    
+    @GET
+    @Path("/delete")
+    @Produces("application/json")
+    public Response deleteUser(@HeaderParam("accessToken") String accessToken, @QueryParam("id") String id) {
+        LOG.info("Request for Delete User");
+        LOG.info(String.format("token: {}", accessToken));
+
+        Gson jsonConstructor = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject response = new JsonObject();
+
+        //if(accessToken.equalsIgnoreCase(Config.get("ACCESS_TOKEN"))){
+        if (accessToken.equalsIgnoreCase("password")) {
+            LOG.info("correct access token");
+            try {
+                LOG.info("Received parameters: id="+id);
+                UsuarioDaoImp udi = new UsuarioDaoImp();
+                UsuarioDto uwi = new UsuarioDto();
+                uwi.setId(Integer.parseInt(id));
+                int result = udi.eliminar(uwi);
+                if(result == -1){
+                    response.addProperty("result", "success");
+                }else{
+                    response.addProperty("result", "failed");
+                }
+                response.addProperty("response", "success");
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            } catch (Exception ex) {
+                LOG.info("There was an exception: " + ex.toString());
+                response.addProperty("response", "failed");
+                response.addProperty("message", "Internal Server Error: " + ex.getLocalizedMessage());
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        } else {
+            LOG.info("invalid access token");
+            response.addProperty("response", "failed");
+            response.addProperty("message", "Invalid Access Token");
+            return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+    }
 }
