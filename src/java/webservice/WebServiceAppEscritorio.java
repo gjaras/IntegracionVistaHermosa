@@ -5,8 +5,11 @@
  */
 package webservice;
 
+import dao.AntecedentesDaoImp;
+import dao.DocumentoDaoImp;
 import dao.FuncionarioDaoImp;
 import dao.PermisoDaoImp;
+import dao.ReportePermisoFilaDaoImp;
 import dao.ResolucionDaoImp;
 import dao.UnidadDaoImp;
 import dao.UsuarioDaoImp;
@@ -556,5 +559,67 @@ public class WebServiceAppEscritorio {
         }
         return mensajeRetorno;
     }
+    @WebMethod(operationName = "getAntecedentes")
+    public String getAntecedentes(int run){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("Antecedentes").Serializar(new AntecedentesDaoImp().getAntecedentes(run));
+            System.out.println(mensajeRetorno);
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error:"+ex.getMessage());
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    @WebMethod(operationName = "getReportePermisos")
+    public String getReportePermisos(Date inicio, Date termino){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("ReportePermisoFila").Serializar((List)new ReportePermisoFilaDaoImp().getReportePermisos(inicio, termino));
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error:"+ex.getMessage());
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
     
+    @WebMethod(operationName = "getDocumentosByPermiso")
+    public String getDocumentosByPermiso(int id_permiso){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("Documentos").Serializar(
+                            (List)new DocumentoDaoImp().listarDocumentosByPermiso(id_permiso));
+            System.out.println(mensajeRetorno);
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error:"+ex.getMessage());
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    
+    @WebMethod(operationName = "getDocumentoById")
+    public String getDocumentoById(int id){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("Documentos").Serializar(
+                            new DocumentoDaoImp().buscar(id));
+            System.out.println(mensajeRetorno);
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Error:"+ex.getMessage());
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
 }
