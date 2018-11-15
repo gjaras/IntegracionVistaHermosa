@@ -45,7 +45,7 @@ public class WebServiceAppWeb {
     }
 
     @POST
-    @Path("/requestauth")
+    @Path("/requestAuth")
     @Consumes("application/json")
     @Produces("application/json")
     public Response requestAuth(@HeaderParam("accessToken") String accessToken, String content) {
@@ -93,7 +93,7 @@ public class WebServiceAppWeb {
     }
 
     @POST
-    @Path("/requestdashboardinfo")
+    @Path("/requestDashboardInfo")
     @Consumes("application/json")
     @Produces("application/json")
     public Response requestDashboardInfo(@HeaderParam("accessToken") String accessToken, String content) {
@@ -163,7 +163,7 @@ public class WebServiceAppWeb {
     }
 
     @GET
-    @Path("/requestuserlist")
+    @Path("/requestUserList")
     @Produces("application/json")
     public Response requestUserList(@HeaderParam("accessToken") String accessToken) {
         LOG.info("Request for User List Initiated");
@@ -205,7 +205,7 @@ public class WebServiceAppWeb {
     }
     
     @GET
-    @Path("/requestuserlistwp")
+    @Path("/requestUserListWP")
     @Produces("application/json")
     public Response requestUserListWithParameters(@HeaderParam("accessToken") String accessToken, 
             @QueryParam("id") String id, @QueryParam("nombreUsr") String nombre, @QueryParam("tipoUsr") String tipo) {
@@ -249,7 +249,7 @@ public class WebServiceAppWeb {
     }
 
     @POST
-    @Path("/createuser")
+    @Path("/createUser")
     @Produces("application/json")
     public Response createUser(@HeaderParam("accessToken") String accessToken, String content) {
         LOG.info("Request for Create User initiated");
@@ -310,7 +310,7 @@ public class WebServiceAppWeb {
     }
 
     @POST
-    @Path("/requestpeticioneslist")
+    @Path("/requestPeticionesList")
     @Consumes("application/json")
     @Produces("application/json")
     public Response requestPeticionesList(@HeaderParam("accessToken") String accessToken, String content) {
@@ -366,5 +366,44 @@ public class WebServiceAppWeb {
             return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
 
+    }
+    
+    @GET
+    @Path("/requestUserData")
+    @Produces("application/json")
+    public Response requestUserData(@HeaderParam("accessToken") String accessToken, @QueryParam("id") String id) {
+        LOG.info("Request for User Data");
+        LOG.info(String.format("token: {}", accessToken));
+
+        Gson jsonConstructor = new GsonBuilder().setPrettyPrinting().create();
+        JsonObject response = new JsonObject();
+
+        //if(accessToken.equalsIgnoreCase(Config.get("ACCESS_TOKEN"))){
+        if (accessToken.equalsIgnoreCase("password")) {
+            LOG.info("correct access token");
+            try {
+                LOG.info("Received parameters: id="+id);
+                UsuarioDaoImp udi = new UsuarioDaoImp();
+                UsuarioDto uwi = new UsuarioDto();
+                uwi.setId(Integer.parseInt(id));
+                UsuarioDto udt = udi.buscar(uwi);
+                response.addProperty("id",udt.getId());
+                response.addProperty("nombre", udt.getNombre());
+                response.addProperty("tipo", udt.getTipoUsuario());
+                response.addProperty("rut", udt.getFuncionario().getRun()+"-"+udt.getFuncionario().getDv());
+                response.addProperty("response", "success");
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            } catch (Exception ex) {
+                LOG.info("There was an exception: " + ex.toString());
+                response.addProperty("response", "failed");
+                response.addProperty("message", "Internal Server Error: " + ex.getLocalizedMessage());
+                return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        } else {
+            LOG.info("invalid access token");
+            response.addProperty("response", "failed");
+            response.addProperty("message", "Invalid Access Token");
+            return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
     }
 }

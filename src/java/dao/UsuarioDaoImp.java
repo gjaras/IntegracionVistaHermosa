@@ -112,6 +112,7 @@ public class UsuarioDaoImp implements UsuarioDao{
                     + ",u.clave"
                     + ",u.tipo_usuario"
                     + ",u.funcionario_run_sin_dv"
+                    + ",f.run_dv"
                     + ",f.nom_funcionario"
                     + ",f.ap_paterno"
                     + ",f.ap_materno"
@@ -135,6 +136,7 @@ public class UsuarioDaoImp implements UsuarioDao{
                 {
                     FuncionarioDto funcionario = new FuncionarioDto();
                     funcionario.setRun(rs.getInt("funcionario_run_sin_dv"));
+                    funcionario.setDv(rs.getInt("run_dv"));
                     funcionario.setNombre(rs.getString("nom_funcionario"));
                     funcionario.setApellidoPaterno(rs.getString("ap_paterno"));
                     funcionario.setApellidoMaterno(rs.getString("ap_materno"));
