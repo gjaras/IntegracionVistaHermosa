@@ -7,9 +7,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dao.FuncionarioDaoImp;
 import dao.PermisoDaoImp;
+import dao.UnidadDaoImp;
 import dao.UsuarioDaoImp;
 import dto.FuncionarioDto;
 import dto.PermisoDto;
+import dto.UnidadDto;
 import dto.UsuarioDto;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -199,10 +201,14 @@ public class PermisoWs {
 
                 PermisoDaoImp pdi = new PermisoDaoImp();
                 LinkedList<PermisoDto> list = new LinkedList<PermisoDto>();
-                if (request.get("rut") != null) {
-                    list = pdi.buscarPermisos(Integer.parseInt(request.get("rut").getAsString().split("-")[0]));
-                } else {
-                    list = pdi.listPermisos();
+                if(request.get("type").getAsString().equalsIgnoreCase("Administrador")){
+                    list = pdi.listAllPermisos();
+                }else if (request.get("type").getAsString().equalsIgnoreCase("Encargado")){
+                    UnidadDaoImp udi = new UnidadDaoImp();
+                    UnidadDto udto = udi.buscarPorJefe(request.get("rut").getAsInt());
+                    list = pdi.listeUnidadPermisos(udto.getId());
+                }else{
+                    list = pdi.buscarPermisos(request.get("rut").getAsInt());
                 }
                 JsonArray permisoJsonArray = new JsonArray();
                 if (!list.isEmpty()) {

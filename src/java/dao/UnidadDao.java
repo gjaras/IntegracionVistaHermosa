@@ -17,5 +17,6 @@ public interface UnidadDao extends BaseDao<UnidadDto>{
     public LinkedList<UnidadDto> listadoUnidadClaveValor();
     public LinkedList<UnidadDto> listadoUnidadesHijasClaveValor(int id);
     public UnidadDto buscarPorIdParcial(int id);
+    public UnidadDto buscarPorJefe(int id);
     public boolean nombreUnidadExiste(String nombre);
 }
