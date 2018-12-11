@@ -15,4 +15,5 @@ import java.util.LinkedList;
 public interface PermisoDao{
     public LinkedList<PermisoDto> buscarPermisos(int run);
     public LinkedList<PermisoDto> buscarPermisosAnuales();
+    public PermisoDto buscarPermiso(int id);
 }
