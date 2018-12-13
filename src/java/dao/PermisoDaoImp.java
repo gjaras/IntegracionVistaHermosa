@@ -39,7 +39,8 @@ public class PermisoDaoImp implements PermisoDao {
             proc.setInt(6, pdto.getSolicitante().getRun());
             proc.executeQuery();
             int result = proc.getInt(1);
-            if(result == -1){
+            if(result == -1 || result == 130101 || result == 130102){
+                System.out.println(result);
                 return result;
             }else{
                 return buscar(pdto).getId();
@@ -49,7 +50,8 @@ public class PermisoDaoImp implements PermisoDao {
             //return sqle.getErrorCode();
             return -1;
         } catch (Exception e) {
-            System.out.println("UsuarioDaoImp.insertar Error: " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("UsuarioDaoImp.insertar Error: " + e.toString());
             return -1;
         }
     }
@@ -268,7 +270,7 @@ public class PermisoDaoImp implements PermisoDao {
                     + "FROM sol_permiso p "
                     + "LEFT JOIN FUNCIONARIO s ON s.run_sin_dv = p.solicitante_run_sin_dv "
                     + "LEFT JOIN FUNCIONARIO a ON a.run_sin_dv = p.autorizante_run_sin_dv "
-                    + "LEFT JOIN UNIDAD u ON u.id_unidad = s.unidad_id_unidad"
+                    + "LEFT JOIN UNIDAD u ON u.id_unidad = s.unidad_id_unidad "
                     + "WHERE u.id_unidad = ?";
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setInt(1, unidadId);

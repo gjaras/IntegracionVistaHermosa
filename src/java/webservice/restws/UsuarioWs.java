@@ -153,6 +153,7 @@ public class UsuarioWs {
                 LinkedList<UsuarioDto> list = udi.listarUsuariosWithParameters(Objects.toString(id,""),Objects.toString(tipo,""),Objects.toString(nombre,""));
                 JsonArray userJsonArray = new JsonArray();
                 for (UsuarioDto udo : list) {
+                    LOG.info("Members found");
                     JsonObject member = new JsonObject();
                     member.addProperty("id", udo.getId());
                     member.addProperty("nombre", udo.getNombre());

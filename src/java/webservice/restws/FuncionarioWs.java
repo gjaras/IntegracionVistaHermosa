@@ -114,35 +114,52 @@ public class FuncionarioWs {
     }
 
     @GET
-    @Path("/changeState")
+    @Path("/requestView")
     @Produces("application/json")
-    public Response changeSolicitudState(@HeaderParam("accessToken") String accessToken,
-            @QueryParam("id") String id, @QueryParam("opType") String opType,
-            @QueryParam("runSinDv") String runSinDv) {
-        LOG.info("Request for Change Solicitud State");
+    public Response requestFuncionarioView(@HeaderParam("accessToken") String accessToken,
+            @QueryParam("rut") String rut) {
+        LOG.info("Request for view funcionario");
         LOG.info(String.format("token: {}", accessToken));
 
         Gson jsonConstructor = new GsonBuilder().setPrettyPrinting().create();
         JsonObject response = new JsonObject();
 
-        //if(accessToken.equalsIgnoreCase(Config.get("ACCESS_TOKEN"))){
         if (accessToken.equalsIgnoreCase("password")) {
             LOG.info("correct access token");
             try {
-                LOG.info("Received parameters: id=" + id + " opType=" + opType);
+                LOG.info("Received parameters: rut=" + rut);
+                FuncionarioDaoImp fdi = new FuncionarioDaoImp();
+                FuncionarioDto fdto = new FuncionarioDto();
+                fdto.setRun(Integer.parseInt(rut));
+                fdto = fdi.buscar(fdto);
+                JsonObject funcionario = new JsonObject();
+                funcionario.addProperty("rut", fdto.getRun() + "-" + fdto.getDv());
+                funcionario.addProperty("nombre", fdto.getNombre() + " " + fdto.getApellidoPaterno() + " " + fdto.getApellidoMaterno());
+                funcionario.addProperty("fecNac", fdto.getFechaNacimiento().toString());
+                funcionario.addProperty("correo", fdto.getCorreo());
+                funcionario.addProperty("direccion", fdto.getDireccion());
+                funcionario.addProperty("cargo", fdto.getCargo());
+                funcionario.addProperty("unidad", fdto.getUnidad().getNombre());
+                response.add("funcionario", funcionario);
+
                 PermisoDaoImp pdi = new PermisoDaoImp();
-                int result;
-                if (opType.equalsIgnoreCase("accept")) {
-                    result = pdi.aceptar(Integer.parseInt(id), Integer.parseInt(runSinDv));
-                } else {
-                    result = pdi.rechazar(Integer.parseInt(id), Integer.parseInt(runSinDv));
+                LinkedList<PermisoDto> list = new LinkedList();
+                list = pdi.buscarPermisos(Integer.parseInt(rut));
+                JsonArray permisoJsonArray = new JsonArray();
+                for (PermisoDto pdo : list) {
+                    LOG.info("permisos found. Returning permisos.");
+                    JsonObject permisoJsonO = new JsonObject();
+                    permisoJsonO.addProperty("permisoId", pdo.getId());
+                    permisoJsonO.addProperty("permisoFunc", pdo.getSolicitante().getRun() + "-" + pdo.getSolicitante().getDv());
+                    permisoJsonO.addProperty("permisoType", pdo.getTipo());
+                    permisoJsonO.addProperty("permisoFechaSol", pdo.getFechaSolicitud().toString());
+                    permisoJsonO.addProperty("permisoFechaIni", pdo.getFechaInicio().toString());
+                    permisoJsonO.addProperty("permisoFechaFin", pdo.getFechaTermino().toString());
+                    permisoJsonO.addProperty("permisoStatus", pdo.getEstado());
+                    permisoJsonO.addProperty("permisoAut", pdo.getAutorizante() == null ? "N/A" : pdo.getAutorizante().getRun() + "-" + pdo.getAutorizante().getDv());
+                    permisoJsonArray.add(permisoJsonO);
                 }
-                LOG.info("result: " + result);
-                if (result == -1) {
-                    response.addProperty("result", "success");
-                } else {
-                    response.addProperty("result", "failed");
-                }
+                response.add("permisoList", permisoJsonArray);
                 response.addProperty("response", "success");
                 return Response.ok(jsonConstructor.toJson(response), MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (Exception ex) {

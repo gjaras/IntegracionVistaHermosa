@@ -55,7 +55,7 @@ public class DocumentoDaoImp implements DocumentoDao {
     
     @Override
     public int insertar(DocumentoDto dto) {
-        return 1;
+        return 0;
     }
 
     @Override
