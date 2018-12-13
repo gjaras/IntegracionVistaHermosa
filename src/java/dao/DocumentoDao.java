@@ -12,6 +12,6 @@ import java.util.LinkedList;
  *
  * @author thor
  */
-public interface DocumentoDao extends BaseDao{
+public interface DocumentoDao extends BaseDao<DocumentoDto>{
     public LinkedList<DocumentoDto> listarDocumentosByPermiso(int id_permiso);
 }

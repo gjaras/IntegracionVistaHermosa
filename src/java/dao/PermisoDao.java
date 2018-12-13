@@ -12,8 +12,9 @@ import java.util.LinkedList;
  *
  * @author christian
  */
-public interface PermisoDao{
+public interface PermisoDao extends BaseDao<PermisoDto>{
     public LinkedList<PermisoDto> buscarPermisos(int run);
     public LinkedList<PermisoDto> buscarPermisosAnuales();
     public PermisoDto buscarPermiso(int id);
+
 }

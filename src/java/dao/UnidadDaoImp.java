@@ -173,6 +173,35 @@ public class UnidadDaoImp implements UnidadDao{
         }
         return dto;
     }
+    
+    @Override
+    public UnidadDto buscarPorJefe(int jefeId) {
+        UnidadDto dto = new UnidadDto();
+        try
+        {
+            Connection con = Conexion.getConexion();
+            String sql = "SELECT "
+                    + "u.id_unidad "
+                    + "FROM UNIDAD u "
+                    + "WHERE u.jefe_unidad_run_sin_dv = ?";
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setInt(1, jefeId);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next())
+            {
+                dto.setId(rs.getInt("id_unidad"));
+            }
+        }
+        catch(SQLException sqlex)
+        {
+            System.out.println("Unidad.buscar Error sql: "+sqlex.getMessage());
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Unidad.buscar Error: "+ex.getMessage());
+        }
+        return dto;
+    }
 
     @Override
     public LinkedList<UnidadDto> listarUnidades() {
