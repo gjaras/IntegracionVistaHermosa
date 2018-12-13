@@ -69,8 +69,15 @@ public class UnidadDaoImp implements UnidadDao{
             proc.setString(4,dto.getDescripcion());
             proc.setString(5, dto.getDireccion());
             proc.setInt(6, dto.getHabilitado());
-            proc.setInt(7, dto.getPadre().getId());
-            proc.setInt(8, dto.getJefe().getRun());
+            if(dto.getPadre() == null)
+                proc.setNull(7, java.sql.Types.INTEGER);
+            else
+                proc.setInt(7, dto.getPadre().getId());
+            if(dto.getJefe() == null)
+                proc.setNull(8, java.sql.Types.INTEGER);
+            else
+                proc.setInt(8, dto.getJefe().getRun());
+            System.out.println(dto.toString());
             proc.executeQuery();
             return proc.getInt(1);
         }catch(SQLException sqle)

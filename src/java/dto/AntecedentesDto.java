@@ -107,11 +107,15 @@ public class AntecedentesDto implements Empaquetable{
                 //Cantidad
                 Element cantidadXML = doc.createElement("cantidad");
                 cantidadXML.appendChild(doc.createTextNode(String.valueOf(columna.get(2))));
+                //Periodo
+                Element periodoXML = doc.createElement("periodo");
+                periodoXML.appendChild(doc.createTextNode(String.valueOf(columna.get(3))));
                 
                 //Ahora se agregan los elementos a la fila
                 filaXML.appendChild(estadoXML);
                 filaXML.appendChild(tipo_permisoXML);
                 filaXML.appendChild(cantidadXML);
+                filaXML.appendChild(periodoXML);
                 //Finalmente se agrega la fila al conjunto de filas
                 filasXML.appendChild(filaXML);
             }
@@ -134,7 +138,8 @@ public class AntecedentesDto implements Empaquetable{
                     filasTXT += ", ";
                 filasTXT += "fila{estado="+String.valueOf(columna.get(0))+
                             ", tipo_permiso="+String.valueOf(columna.get(1))+
-                            ", cantidad="+String.valueOf(columna.get(2))+"}";
+                            ", cantidad="+String.valueOf(columna.get(2))+
+                            ", periodo="+String.valueOf(columna.get(3))+"}";
             }
             filasTXT += "}";
         }

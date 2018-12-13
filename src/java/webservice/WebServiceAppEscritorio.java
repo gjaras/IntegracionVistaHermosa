@@ -107,7 +107,7 @@ public class WebServiceAppEscritorio {
         {
             UnidadDto padre = new UnidadDto();
             padre.setId(unidad_padre);
-            unidad.setPadre(unidad);
+            unidad.setPadre(padre);
         }
         if(jefe_unidad > 0)
         {
@@ -138,7 +138,7 @@ public class WebServiceAppEscritorio {
         {
             UnidadDto padre = new UnidadDto();
             padre.setId(unidad_padre);
-            unidad.setPadre(unidad);
+            unidad.setPadre(padre);
         }
         if(jefe_unidad > 0)
         {
@@ -482,6 +482,20 @@ public class WebServiceAppEscritorio {
         try
         {
             mensajeRetorno = new XmlSerializador("Permisos").Serializar((List)new PermisoDaoImp().buscarPermisos(run));
+        }
+        catch(Exception ex)
+        {
+            mensajeRetorno = new XmlSerializador("").getDummyError(ex.getMessage());
+        }
+        return mensajeRetorno;
+    }
+    
+    @WebMethod(operationName = "buscarPermisoPorId")
+    public String buscarPermisoPorId(@WebParam(name = "id") int id){
+        String mensajeRetorno;
+        try
+        {
+            mensajeRetorno = new XmlSerializador("").Serializar(new PermisoDaoImp().buscarPermiso(id));
         }
         catch(Exception ex)
         {
